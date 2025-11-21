@@ -1,0 +1,13 @@
+0.1
+- Added Kemono's 16x16 gork sprite.
+- Removed duplicate column.
+- Created alternate sprite with reordered rows to NESW format for Stendhal.
+- Scaled to 32x32 w/out filter.
+- Scaled to 32x32 w/ scale2x filter.
+- Created 16x24 versions.
+- Scaled 16x24 sprite to 32x48 w/out filter.
+- Scaled 16x24 sprite to 32x48 w/ scale2x filter.
+- Touched up east-facing frame 3 (pixel out of place)
+- Touched up north-facing frame 3 (pixel shading)
+- Re-ordered west-facing frames.
+- Began touching up 32x32 sprite to replace 32x32_scale version.
