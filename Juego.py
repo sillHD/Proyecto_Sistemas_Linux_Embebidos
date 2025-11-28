@@ -3,6 +3,7 @@ import pygame
 import math
 import time
 import random
+import psutil
 
 # Rutas para las imagenes
 
@@ -10,10 +11,9 @@ import random
 # Ubicación absoluta del archivo main.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Función para formar una ruta válida para cualquier OS
+# Funcion para formar una ruta válida para cualquier OS
 def ruta(*subrutas):
     return os.path.join(BASE_DIR, *subrutas)
-
 
 # Funciones
 def walking_animation(walk, pn_x, pn_y):
@@ -38,6 +38,16 @@ def jumping_animation(jump, pn_x, pn_y, angulo):
         ventana.blit(jump[6], (pn_x, pn_y))
     if angulo >= 2.625 and angulo <= math.pi:
         ventana.blit(jump[7], (pn_x, pn_y))
+
+def gpu_usage():
+    """Devuelve porcentaje de GPU o 0 si no disponible"""
+    try:
+        with open("/sys/class/drm/card0/device/gpu_busy_percent") as f:
+            return int(f.read().strip())
+    except:
+        return 0
+
+
 
 # Inicializar
 pygame.init()
@@ -161,6 +171,8 @@ player_w = 59
 enemy_h = 64
 enemy_w = 56
 
+last_monitor_time = time.perf_counter()  # para limitar frecuencia de impresión
+monitor_interval = 0.5  # segundos entre impresiones
 
 # Bucle menu
 menu_ejecucion = True
@@ -174,10 +186,18 @@ while menu_ejecucion:
             pygame.quit()
     ventana.blit(menu, [0, 0])
     pygame.display.update()
-    
+
 # Bucle principal
 jugando = True
 while jugando:
+    # Medicion de CPU y GPU cada monitor_interval segundos
+    current_time = time.perf_counter()
+    if current_time - last_monitor_time >= monitor_interval:
+        cpu = psutil.cpu_percent(interval=0.0)  # sin bloquear
+        gpu = gpu_usage()
+        print(f"CPU: {cpu:.1f}% | GPU: {gpu}%")
+        last_monitor_time = current_time
+
     reloj.tick(60)
     # Eventos
     for event in pygame.event.get():
@@ -234,7 +254,7 @@ while jugando:
             ve2 = random.choice(ve)
         else:
             ve2 = random.choice(vemax)
-    print(time.perf_counter()-tiempo)
+    #print(time.perf_counter()-tiempo)
 
     # Movimiento de las nubes
     pr_x1 += vr_x1
