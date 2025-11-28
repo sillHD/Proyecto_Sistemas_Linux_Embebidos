@@ -40,7 +40,6 @@ def jumping_animation(jump, pn_x, pn_y, angulo):
         ventana.blit(jump[7], (pn_x, pn_y))
 
 # Inicializar
-pygame.mixer.quit()
 pygame.init()
 
 # Medidas
@@ -150,10 +149,10 @@ ve2 = random.choice(ve)
 tiempo = time.perf_counter()
 
 # --- Música y efectos ---
-pygame.mixer.music.load(ruta("Sounds", "normal.mp3"))  # carga música
-pygame.mixer.music.play(-1)                            # reproducir en loop
-volume = 0                                             # variable para controlar volumen
-pygame.mixer.music.set_volume(0.5)                     # volumen inicial 50%
+# pygame.mixer.music.load(ruta("Sounds", "normal.mp3"))  # carga música
+# pygame.mixer.music.play(-1)                            # reproducir en loop
+# volume = 0                                             # variable para controlar volumen
+# pygame.mixer.music.set_volume(0.5)                     # volumen inicial 50%
 
 
 # Hitbox
@@ -323,10 +322,10 @@ while jugando:
         jugando = False
 
     # Control de musica
-    if volume == -1:
-        pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() - 0.01)
-    if volume == 1:
-        pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() + 0.01)
+#    if volume == -1:
+#        pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() - 0.01)
+#   if volume == 1:
+#       pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() + 0.01)
     # Actualizar
     pygame.display.update()
 # Salir
