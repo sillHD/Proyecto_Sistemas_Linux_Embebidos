@@ -40,6 +40,7 @@ def jumping_animation(jump, pn_x, pn_y, angulo):
         ventana.blit(jump[7], (pn_x, pn_y))
 
 # Inicializar
+pygame.mixer.quit()
 pygame.init()
 
 # Medidas
