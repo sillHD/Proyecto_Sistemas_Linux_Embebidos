@@ -46,6 +46,7 @@ pygame.init()
 # Medidas
 # ANCHO = 1280
 # ALTO = 720
+
 ventana = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 ANCHO = ventana.get_width()
 ALTO = ventana.get_height()
@@ -56,8 +57,7 @@ NEGRO = (0, 0, 0)
 VERDE = (0, 255, 0)
 MARRON = (180, 100, 60)
 
-# Ventana
-ventana = pygame.display.set_mode((ANCHO, ALTO))
+# reloj
 reloj = pygame.time.Clock()
 
 # Imagenes
