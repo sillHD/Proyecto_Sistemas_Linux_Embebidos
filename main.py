@@ -1,191 +1,245 @@
-# main.py
 import pygame
-from settings import *
-from funciones import walking_animation, jumping_animation
-from utils import monitor_usage, gpu_usage
-import random
-import time
-import psutil
+from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 import math
+import random
+from settings import ruta
+from funciones import walking_animation, jumping_animation
 
-# --- Inicialización ---
+
+# =======================
+# CONFIG VENTANA
+# =======================
+ANCHO_P, ALTO_P = 1280, 720
+
 pygame.init()
+pygame.display.set_mode((ANCHO_P, ALTO_P), DOUBLEBUF | OPENGL)
+pygame.display.set_caption("Juego OpenGL")
 
-# Resolución interna del juego
-GAME_WIDTH, GAME_HEIGHT = 1280, 720
-game_surface = pygame.Surface((GAME_WIDTH, GAME_HEIGHT))
 
-# Pantalla full-screen
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-SCREEN_WIDTH, SCREEN_HEIGHT = screen.get_size()
+# =======================
+# OPENGL SETUP
+# =======================
+glMatrixMode(GL_PROJECTION)
+glLoadIdentity()
+glOrtho(0, ANCHO_P, 0, ALTO_P, -1, 1)
+glMatrixMode(GL_MODELVIEW)
+glLoadIdentity()
 
-reloj = pygame.time.Clock()
-FPS = 30
+glEnable(GL_TEXTURE_2D)
+glDisable(GL_DEPTH_TEST)
 
-# --- Carga de imágenes ---
-menu = pygame.image.load(ruta("texturas", "menu.png")).convert_alpha()
-fondo = pygame.image.load(ruta("texturas", "background.png")).convert()
-stayR = pygame.image.load(ruta("texturas", "stay_right.png")).convert_alpha()
-stayL = pygame.image.load(ruta("texturas", "stay_left.png")).convert_alpha()
-icono = pygame.image.load(ruta("texturas", "icono.png")).convert_alpha()
-icono.set_colorkey(NEGRO)
-pygame.display.set_icon(icono)
+
+# =======================
+# FUNCIÓN PARA CARGAR TEXTURAS
+# =======================
+def load_texture(path):
+    surf = pygame.image.load(path).convert_alpha()
+    data = pygame.image.tostring(surf, "RGBA", True)
+    w, h = surf.get_size()
+
+    tex = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, tex)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, data)
+
+    return tex, w, h
+
+
+# =======================
+# DIBUJAR TEXTURA
+# =======================
+def draw_texture(tex_id, x, y, w, h):
+    glBindTexture(GL_TEXTURE_2D, tex_id)
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0); glVertex2f(x, y)
+    glTexCoord2f(1, 0); glVertex2f(x + w, y)
+    glTexCoord2f(1, 1); glVertex2f(x + w, y + h)
+    glTexCoord2f(0, 1); glVertex2f(x, y + h)
+    glEnd()
+
+
+# =======================
+# CARGAR TEXTURAS (USANDO TUS RUTAS)
+# =======================
+
+# --- Fondo ---
+fondo_tex = load_texture(ruta("texturas", "background.png"))
+
+# --- Stay ---
+stayR_tex = load_texture(ruta("texturas", "stay_right.png"))
+stayL_tex = load_texture(ruta("texturas", "stay_left.png"))
+
+# --- Walk ---
+walk_right_tex = [
+    load_texture(ruta("texturas", "walk", "right", f"run_r{i}.png"))
+    for i in range(1, 9)
+]
+
+walk_left_tex = [
+    load_texture(ruta("texturas", "walk", "left", f"run_l{i}.png"))
+    for i in range(1, 9)
+]
+
+# --- Jump ---
+jump_right_tex = [
+    load_texture(ruta("texturas", "jump", "jump_right", f"jump_r{i}.png"))
+    for i in range(1, 9)
+]
+
+jump_left_tex = [
+    load_texture(ruta("texturas", "jump", "jump_left", f"jump_l{i}.png"))
+    for i in range(1, 9)
+]
+
+# --- Clouds ---
+clouds_tex = [
+    load_texture(ruta("texturas", "clouds", f"c{i}.png"))
+    for i in range(1, 4)
+]
+
+# --- Enemigos ---
+enemy_left_tex = [
+    load_texture(ruta("texturas", "enemy", "left", f"e_l{i}.png"))
+    for i in range(1, 4)
+]
+
+enemy_right_tex = [
+    load_texture(ruta("texturas", "enemy", "right", f"e_r{i}.png"))
+    for i in range(1, 4)
+]
+
+
+# =======================
+# VARIABLES DEL JUEGO
+# =======================
+pn_x, pn_y = 640, 580
+vn_x = 0
+velocidad = 5
+
+angulo = 0
+direccion = -1
+
+frame_counter = 0
 
 # Nubes
-clouds = [pygame.image.load(ruta("texturas", "clouds", f"c{i}.png")).convert_alpha() for i in range(1,4)]
-for c in clouds: c.set_colorkey(NEGRO)
+cloud_positions = [
+    [800, 520, random.choice(clouds_tex)],
+    [300, 460, random.choice(clouds_tex)],
+    [1100, 500, random.choice(clouds_tex)],
+]
 
-# Enemigos y jugador
-enemy_right = [pygame.image.load(ruta("texturas", "enemy", "right", f"e_r{i}.png")).convert_alpha() for i in range(1,4)]
-enemy_left = [pygame.image.load(ruta("texturas", "enemy", "left", f"e_l{i}.png")).convert_alpha() for i in range(1,4)]
-walk_right = [pygame.image.load(ruta("texturas", "walk", "right", f"run_r{i}.png")).convert_alpha() for i in range(1,9)]
-walk_left = [pygame.image.load(ruta("texturas", "walk", "left", f"run_l{i}.png")).convert_alpha() for i in range(1,9)]
-jump_right = [pygame.image.load(ruta("texturas", "jump", "jump_right", f"jump_r{i}.png")).convert_alpha() for i in range(1,9)]
-jump_left = [pygame.image.load(ruta("texturas", "jump", "jump_left", f"jump_l{i}.png")).convert_alpha() for i in range(1,9)]
+# Enemigos
+pe_x1, pe_y1 = -60, 580
+pe_x2, pe_y2 = 1224, 580
+ve1, ve2 = random.randint(3, 6), random.randint(3, 6)
 
-# --- Datos iniciales ---
-pn_x, pn_y = 640, 0
-vn_x, velocidad = 0, 5
-angulo, direccion = 0.0, -1
-frame_counter, control = 0, 0
-pr_x1, pr_x2, pr_x3, pr_x4 = 800, 220, 340, 542
-pr_y = 100
-vr_x1, vr_x2, vr_x3, vr_x4 = [random.randint(1,3) for _ in range(4)]
-cloud1, cloud2, cloud3, cloud4 = [random.choice(clouds) for _ in range(4)]
-pe_x1, pe_y1, pe_x2, pe_y2 = -60, 610, 1224, 610
-ve, vemax = [4,6,8], [7,8,9]
-ve1, ve2 = random.choice(ve), random.choice(ve)
-tiempo = time.perf_counter()
 
-# Hitboxes
-player_w, player_h = 59, 93
-enemy_w, enemy_h = 56, 64
-player_rect = pygame.Rect(pn_x, pn_y, player_w, player_h)
-enemy1_rect = pygame.Rect(pe_x1, pe_y1, enemy_w, enemy_h)
-enemy2_rect = pygame.Rect(pe_x2, pe_y2, enemy_w, enemy_h)
-
-# Variables de monitor
-last_monitor_time = time.perf_counter()
-monitor_interval = 0.5
-
-# --- Bucle menu ---
-menu_ejecucion = True
-while menu_ejecucion:
-    reloj.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-            menu_ejecucion = False
-        elif event.type == pygame.QUIT:
-            pygame.quit()
-    screen.fill(NEGRO)
-    x_offset = (SCREEN_WIDTH - GAME_WIDTH)//2
-    y_offset = (SCREEN_HEIGHT - GAME_HEIGHT)//2
-    screen.blit(pygame.transform.scale(menu, (GAME_WIDTH, GAME_HEIGHT)), (x_offset, y_offset))
-    pygame.display.update()
-
-# --- Bucle principal ---
+clock = pygame.time.Clock()
 jugando = True
+
+
+# =======================
+# LOOP PRINCIPAL
+# =======================
 while jugando:
-    start_frame = time.perf_counter()
 
-    # Medición CPU/GPU
-    current_time = time.perf_counter()
-    if current_time - last_monitor_time >= monitor_interval:
-        cpu = psutil.cpu_percent(interval=0.0)
-        gpu = gpu_usage()
-        print(f"CPU: {cpu:.1f}% | GPU: {gpu}%")
-        last_monitor_time = current_time
+    clock.tick(60)
+    glClear(GL_COLOR_BUFFER_BIT)
 
-    reloj.tick(FPS)
-
-    # --- Eventos ---
+    # -----------------
+    # MANEJO DE EVENTOS
+    # -----------------
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == QUIT:
             jugando = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE: jugando = False
-            if event.key == pygame.K_RIGHT: vn_x = velocidad
-            if event.key == pygame.K_LEFT: vn_x = -velocidad
-            if event.key == pygame.K_UP: angulo = 0.001
-        if event.type == pygame.KEYUP:
-            if event.key in [pygame.K_RIGHT, pygame.K_LEFT]:
+
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                jugando = False
+            if event.key == K_RIGHT:
+                vn_x = velocidad
+            if event.key == K_LEFT:
+                vn_x = -velocidad
+            if event.key == K_UP:
+                if angulo == 0:
+                    angulo = 0.001
+
+        if event.type == KEYUP:
+            if event.key in (K_RIGHT, K_LEFT):
+                direccion = -1 if vn_x > 0 else 1
                 vn_x = 0
-                direccion = 1 if event.key==pygame.K_LEFT else -1
 
-    # --- Movimiento jugador ---
+    # -----------------
+    # MOVIMIENTO JUGADOR
+    # -----------------
     pn_x += vn_x
-    pn_y = 580 - math.sin(angulo)*200
-    if angulo > 0: angulo += 0.1
-    if angulo >= math.pi: angulo = 0.0
-    pn_x = max(0, min(GAME_WIDTH-60, pn_x))
-    pn_y = max(0, min(GAME_HEIGHT-60, pn_y))
+    pn_y = 580 - math.sin(angulo) * 200
 
-    # --- Movimiento enemigos ---
+    if angulo > 0:
+        angulo += 0.10
+        if angulo >= math.pi:
+            angulo = 0
+
+    # -----------------
+    # FONDO
+    # -----------------
+    draw_texture(fondo_tex[0], 0, 0, ANCHO_P, ALTO_P)
+
+    # -----------------
+    # NUBES
+    # -----------------
+    for i in range(len(cloud_positions)):
+        x, y, tex = cloud_positions[i]
+        draw_texture(tex[0], x, y, tex[1], tex[2])
+
+        cloud_positions[i][0] -= 1
+        if cloud_positions[i][0] < -200:
+            cloud_positions[i][0] = ANCHO_P + 100
+
+    # -----------------
+    # ENEMIGOS
+    # -----------------
+    # Enemigo 1
     pe_x1 += ve1
-    if pe_x1 > GAME_WIDTH: 
-        pe_x1 = -77
-        ve1 = random.choice(ve if time.perf_counter()<tiempo+20 else vemax)
+    draw_texture(enemy_right_tex[frame_counter % 3][0], pe_x1, pe_y1,
+                 enemy_right_tex[0][1], enemy_right_tex[0][2])
+
+    if pe_x1 > ANCHO_P + 60:
+        pe_x1 = -60
+
+    # Enemigo 2
     pe_x2 -= ve2
-    if pe_x2 < -60: 
-        pe_x2 = GAME_WIDTH + 60
-        ve2 = random.choice(ve if time.perf_counter()<tiempo+20 else vemax)
+    draw_texture(enemy_left_tex[frame_counter % 3][0], pe_x2, pe_y2,
+                 enemy_left_tex[0][1], enemy_left_tex[0][2])
 
-    # --- Movimiento nubes ---
-    if control % 10 == 0:
-        vr_x1, vr_x2, vr_x3, vr_x4 = [random.randint(1,3) for _ in range(4)]
-    pr_x1 += vr_x1; pr_x2 += vr_x2; pr_x3 += vr_x3; pr_x4 += vr_x4
-    for idx, pr_x in enumerate([pr_x1, pr_x2, pr_x3, pr_x4]):
-        if pr_x > GAME_WIDTH:
-            if idx==0: pr_x1=-77
-            if idx==1: pr_x2=-77
-            if idx==2: pr_x3=-77
-            if idx==3: pr_x4=-77
+    if pe_x2 < -60:
+        pe_x2 = ANCHO_P + 60
 
-    # --- Dibujos ---
-    game_surface.blit(fondo, (0,0))
-    if control % 25 == 0: cloud1 = random.choice(clouds)
-    if control % 22 == 0: cloud2 = random.choice(clouds)
-    if control % 17 == 0: cloud3 = random.choice(clouds)
-    if control % 14 == 0: cloud4 = random.choice(clouds)
-    for cx, cy, cloud in [(pr_x1, pr_y-60, cloud1), (pr_x2, pr_y-20, cloud2),
-                          (pr_x3, pr_y-10, cloud3), (pr_x4, pr_y, cloud4)]:
-        if 0 <= cx <= GAME_WIDTH:
-            game_surface.blit(cloud, (cx, cy))
-
-    # --- Animaciones jugador ---
+    # -----------------
+    # DIBUJAR JUGADOR
+    # -----------------
     if vn_x < 0:
-        if angulo==0.0: walking_animation(walk_left, game_surface, pn_x, pn_y, frame_counter)
-        else: jumping_animation(jump_left, game_surface, pn_x, pn_y, angulo)
-    elif vn_x > 0:
-        if angulo==0.0: walking_animation(walk_right, game_surface, pn_x, pn_y, frame_counter)
-        else: jumping_animation(jump_right, game_surface, pn_x, pn_y, angulo)
-    else:
-        if direccion==-1:
-            if angulo==0: game_surface.blit(stayR, (pn_x, pn_y))
-            else: jumping_animation(jump_right, game_surface, pn_x, pn_y, angulo)
+        if angulo == 0:
+            walking_animation(walk_left_tex, pn_x, pn_y, frame_counter)
         else:
-            if angulo==0: game_surface.blit(stayL, (pn_x, pn_y))
-            else: jumping_animation(jump_left, game_surface, pn_x, pn_y, angulo)
+            jumping_animation(jump_left_tex, pn_x, pn_y, angulo)
 
-    # --- Animaciones enemigos ---
-    if 0 <= pe_x1 <= GAME_WIDTH: walking_animation(enemy_right, game_surface, pe_x1, pe_y1, frame_counter)
-    if 0 <= pe_x2 <= GAME_WIDTH: walking_animation(enemy_left, game_surface, pe_x2, pe_y2, frame_counter)
+    elif vn_x > 0:
+        if angulo == 0:
+            walking_animation(walk_right_tex, pn_x, pn_y, frame_counter)
+        else:
+            jumping_animation(jump_right_tex, pn_x, pn_y, angulo)
 
-    # --- Colisiones ---
-    player_rect.topleft = (pn_x, pn_y)
-    enemy1_rect.topleft = (pe_x1, pe_y1)
-    enemy2_rect.topleft = (pe_x2, pe_y2)
-    if player_rect.colliderect(enemy1_rect) or player_rect.colliderect(enemy2_rect):
-        jugando = False
+    else:
+        tex = stayL_tex if direccion == 1 else stayR_tex
+        draw_texture(tex[0], pn_x, pn_y, tex[1], tex[2])
 
-    # --- Render final centrado ---
-    x_offset = (SCREEN_WIDTH - GAME_WIDTH)//2
-    y_offset = (SCREEN_HEIGHT - GAME_HEIGHT)//2
-    screen.fill(NEGRO)
-    screen.blit(game_surface, (x_offset, y_offset))
-    pygame.display.update()
-
+    pygame.display.flip()
     frame_counter += 1
-    control += 1
 
 pygame.quit()
