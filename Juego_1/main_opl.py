@@ -6,7 +6,15 @@ from OpenGL.GLU import *
 import math
 import random
 from settings import *
-from funciones import *   # contiene load_texture_from_surface, draw_texture_tuple, walking_animation_textures, jumping_animation_textures, draw_hp_bar_gl
+from funciones import *   # contiene load_texture_from_surface, draw_texture_tuple, walking_animation_textures, jumping_animation_textures, draw_hp_bar_gl, draw_batch
+
+# Importar módulos de profiling (opcionales)
+try:
+    from profiler_module import FPSCounter, GameProfiler
+    PROFILING_AVAILABLE = True
+except ImportError:
+    PROFILING_AVAILABLE = False
+    print("Aviso: módulos de profiling no disponibles")
 
 # =======================
 # CONFIG VENTANA
@@ -16,7 +24,7 @@ FPS = 60
 
 pygame.init()
 pygame.display.set_mode((ANCHO_P, ALTO_P), DOUBLEBUF | OPENGL)
-pygame.display.set_caption("Juego OpenGL")
+pygame.display.set_caption("Juego OpenGL - Optimizado")
 
 # =======================
 # OPENGL SETUP
@@ -168,6 +176,15 @@ ve1, ve2 = random.randint(3, 6), random.randint(3, 6)
 
 clock = pygame.time.Clock()
 
+# Inicializar contadores de FPS y profiling (si disponibles)
+fps_counter = None
+profiler = None
+if PROFILING_AVAILABLE:
+    fps_counter = FPSCounter(window_size=60)
+    profiler = GameProfiler(output_file="perfil.pstats")
+    # Descomentar para activar profiling (ralentiza la ejecución):
+    # profiler.start()
+
 # Helper: cola de dibujado por textura
 
 def enqueue_draw(draw_queue, tex_tuple, x, y, w=None, h=None, offset=(0,0)):
@@ -318,5 +335,17 @@ while bin == 0:
 
     pygame.display.flip()
     frame_counter += 1
+    
+    # Actualizar contador de FPS
+    if fps_counter is not None:
+        fps_counter.tick()
+        if frame_counter % 300 == 0:  # Mostrar FPS cada 5 segundos (60 FPS * 5)
+            fps = fps_counter.get_fps()
+            ms = fps_counter.get_ms_per_frame()
+            print(f"FPS: {fps:.1f} | MS/Frame: {ms:.2f}")
 
 pygame.quit()
+
+# Guardar profiling si fue iniciado
+if profiler is not None and profiler.running:
+    profiler.stop()
