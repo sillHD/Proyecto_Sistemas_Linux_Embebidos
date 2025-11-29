@@ -1,7 +1,6 @@
 # settings.py
-ANCHO = 1280
-ALTO = 720
-FPS = 60
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 # Colores
 BLANCO = (255, 255, 255)
