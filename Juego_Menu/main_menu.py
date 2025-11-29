@@ -75,8 +75,31 @@ def launch_game(path):
     print(f"Lanzando: {path}")
     # Usar el mismo intérprete
     try:
-        # Bloquea hasta que el proceso termine; permite volver al menú
+        # Cerrar la ventana del menú antes de lanzar el juego para que
+        # la ventana del juego sea la única visible.
+        global screen, font, small, clock
+        try:
+            pygame.display.quit()
+        except Exception:
+            pass
+
+        # Bloquea hasta que el proceso termine; cuando termine, reabrimos el menú
         subprocess.run([sys.executable, path], check=False)
+    finally:
+        # Re-inicializar la ventana del menú (si pygame sigue disponible)
+        try:
+            # Asegurarse de que pygame esté inicializado
+            if not pygame.get_init():
+                pygame.init()
+            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+            pygame.display.set_caption('Selector de Juegos')
+            # Recrear fuentes y reloj en caso de que se hayan cerrado
+            font = pygame.font.SysFont(None, 32)
+            small = pygame.font.SysFont(None, 20)
+            clock = pygame.time.Clock()
+        except Exception:
+            # Si la re-inicialización falla, informamos pero no rompemos el menú caller
+            print('Advertencia: no se pudo reabrir la ventana del menú automaticamente.')
     except Exception as e:
         print('Error al lanzar el juego:', e)
 
