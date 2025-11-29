@@ -3,14 +3,6 @@ import math
 import pygame
 from OpenGL.GL import *
 
-# Intenta usar renderer VBO, sino fallback a immediate mode
-try:
-    from renderer_vbo import BatchRenderer, ortho
-    USE_VBO_RENDERER = True
-except ImportError:
-    USE_VBO_RENDERER = False
-    print("Aviso: renderer_vbo no disponible, usando immediate mode (más lento)")
-
 # ============================================================
 # TEXTURAS
 # ============================================================
