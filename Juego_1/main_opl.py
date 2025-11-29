@@ -24,7 +24,10 @@ pygame.display.set_caption("Juego OpenGL")
 glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
 # Mantengo la proyección tal como tenías (0..ANCHO_P, 0..ALTO_P)
-glOrtho(0, ANCHO_P, 0, ALTO_P, -1, 1)
+# Usar origen en la esquina superior izquierda para que Y crezca hacia abajo.
+# Esto hace que coordenadas como `base_y = 580` sitúen al jugador cerca
+# del borde inferior de la ventana, como en coordenadas de Pygame.
+glOrtho(0, ANCHO_P, ALTO_P, 0, -1, 1)
 glMatrixMode(GL_MODELVIEW)
 glLoadIdentity()
 
@@ -165,6 +168,15 @@ ve1, ve2 = random.randint(3, 6), random.randint(3, 6)
 
 clock = pygame.time.Clock()
 
+# Helper: cola de dibujado por textura
+
+def enqueue_draw(draw_queue, tex_tuple, x, y, w=None, h=None, offset=(0,0)):
+    tex_id, tw, th = tex_tuple
+    if w is None: w = tw
+    if h is None: h = th
+    ox, oy = offset
+    draw_queue.setdefault(tex_id, []).append((ox + x, oy + y, w, h))
+
 # =======================
 # LOOP PRINCIPAL
 # =======================
@@ -175,6 +187,9 @@ while bin == 0:
 
     clock.tick(FPS)
     glClear(GL_COLOR_BUFFER_BIT)
+
+    # reset draw queue cada frame
+    draw_queue = {}
 
     # ---- EVENTOS ----
     for event in pygame.event.get():
@@ -211,14 +226,14 @@ while bin == 0:
 
     # ---- FONDO ----
     # fondo_tex es (tex_id,w,h)
-    draw_texture(fondo_tex[0], 0, 0, ANCHO_P, ALTO_P)
+    enqueue_draw(draw_queue, fondo_tex, 0, 0, ANCHO_P, ALTO_P)
 
     # ---- NUBES ----
     for cloud in cloud_positions:
         x, y, tex, speed, fc = cloud  # Desempaquetar velocidad y contador
         # dibujar solo si visible (optimización)
         if -tex[1] <= x <= ANCHO_P:
-            draw_texture(tex[0], x, y, tex[1], tex[2])
+            enqueue_draw(draw_queue, tex, x, y, tex[1], tex[2])
 
         # Actualizar posición de la nube (moviéndose hacia la izquierda)
         cloud[0] -= speed
@@ -244,7 +259,7 @@ while bin == 0:
         # escogemos frame por frame_counter
         tex_idx = (frame_counter // 10) % 3
         tex_tuple = enemy_right_tex[tex_idx]
-        draw_texture(tex_tuple[0], pe_x1, pe_y1, tex_tuple[1], tex_tuple[2])
+        enqueue_draw(draw_queue, tex_tuple, pe_x1, pe_y1, tex_tuple[1], tex_tuple[2])
     if pe_x1 > ANCHO_P + 60:
         pe_x1 = -60
 
@@ -252,7 +267,7 @@ while bin == 0:
     if -enemy_width <= pe_x2 <= ANCHO_P:
         tex_idx = (frame_counter // 10) % 3
         tex_tuple = enemy_left_tex[tex_idx]
-        draw_texture(tex_tuple[0], pe_x2, pe_y2, tex_tuple[1], tex_tuple[2])
+        enqueue_draw(draw_queue, tex_tuple, pe_x2, pe_y2, tex_tuple[1], tex_tuple[2])
     if pe_x2 < -60:
         pe_x2 = ANCHO_P + 60
 
@@ -268,18 +283,33 @@ while bin == 0:
     # ---- JUGADOR ----
     if vn_x < 0:
         if angulo == 0:
-            # usar animación GPU (lista de tuples)
-            walking_animation(walk_left_tex, pn_x, pn_y, frame_counter)
+            # usar animación GPU (lista de tuples) -> encolar frame
+            idx = (frame_counter // 3) % len(walk_left_tex)
+            tex_tuple = walk_left_tex[idx]
+            enqueue_draw(draw_queue, tex_tuple, pn_x, pn_y, tex_tuple[1], tex_tuple[2])
         else:
-            jumping_animation(jump_left_tex, pn_x, pn_y, angulo)
+            # animación salto: elegir frame por ángulo
+            step = math.pi / len(jump_left_tex)
+            idx = min(int(angulo / step), len(jump_left_tex) - 1)
+            tex_tuple = jump_left_tex[idx]
+            enqueue_draw(draw_queue, tex_tuple, pn_x, pn_y, tex_tuple[1], tex_tuple[2])
     elif vn_x > 0:
         if angulo == 0:
-            walking_animation(walk_right_tex, pn_x, pn_y, frame_counter)
+            idx = (frame_counter // 3) % len(walk_right_tex)
+            tex_tuple = walk_right_tex[idx]
+            enqueue_draw(draw_queue, tex_tuple, pn_x, pn_y, tex_tuple[1], tex_tuple[2])
         else:
-            jumping_animation(jump_right_tex, pn_x, pn_y, angulo)
+            step = math.pi / len(jump_right_tex)
+            idx = min(int(angulo / step), len(jump_right_tex) - 1)
+            tex_tuple = jump_right_tex[idx]
+            enqueue_draw(draw_queue, tex_tuple, pn_x, pn_y, tex_tuple[1], tex_tuple[2])
     else:
         tex = stayL_tex if direccion == 1 else stayR_tex
-        draw_texture(tex[0], pn_x, pn_y, tex[1], tex[2])
+        enqueue_draw(draw_queue, tex, pn_x, pn_y, tex[1], tex[2])
+
+    # ---- FLUSH: dibujar por textura (reduce glBindTexture)
+    for tex_id, quads in draw_queue.items():
+        draw_batch(tex_id, quads)
 
     # ---- BARRA DE VIDA (dibujar al final para que no se borre) ----
     pct = max(0, min(100, player_health))  # asegurar 0..100

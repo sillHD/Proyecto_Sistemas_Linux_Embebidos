@@ -99,6 +99,8 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:  # Disparar con ESPACIO
                 player.shoot()
+            if event.key == pygame.K_ESCAPE:
+                running = False
 
     # ---- ACTUALIZAR ----
     all_sprites.update()
