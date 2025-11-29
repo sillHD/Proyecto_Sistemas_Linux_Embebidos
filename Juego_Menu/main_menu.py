@@ -74,10 +74,10 @@ def launch_game(path):
         return
     print(f"Lanzando: {path}")
     # Usar el mismo intérprete
+    global screen, font, small, clock
     try:
         # Cerrar la ventana del menú antes de lanzar el juego para que
         # la ventana del juego sea la única visible.
-        global screen, font, small, clock
         try:
             pygame.display.quit()
         except Exception:
@@ -85,6 +85,8 @@ def launch_game(path):
 
         # Bloquea hasta que el proceso termine; cuando termine, reabrimos el menú
         subprocess.run([sys.executable, path], check=False)
+    except Exception as e:
+        print('Error al lanzar el juego:', e)
     finally:
         # Re-inicializar la ventana del menú (si pygame sigue disponible)
         try:
@@ -100,8 +102,6 @@ def launch_game(path):
         except Exception:
             # Si la re-inicialización falla, informamos pero no rompemos el menú caller
             print('Advertencia: no se pudo reabrir la ventana del menú automaticamente.')
-    except Exception as e:
-        print('Error al lanzar el juego:', e)
 
 
 running = True
@@ -112,6 +112,14 @@ while running:
         if event.type == QUIT:
             running = False
         if event.type == KEYDOWN:
+            # ESC cierra el programa
+            if event.key == K_ESCAPE:
+                # cerrar pygame y salir inmediatamente
+                try:
+                    pygame.quit()
+                except Exception:
+                    pass
+                sys.exit(0)
             # Navegación: ARRIBA/ABAJO; activar con ENTER
             if event.key == K_UP:
                 selected = max(0, selected - 1)
@@ -123,7 +131,6 @@ while running:
                     launch_game(JUEGO1_PATH)
                 elif selected == 1 and AVAILABLE['Juego 2']:
                     launch_game(JUEGO2_PATH)
-
     screen.fill((18, 24, 34))
 
     # Título
