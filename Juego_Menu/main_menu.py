@@ -5,9 +5,9 @@ Ejecuta los scripts como procesos separados usando el mismo intérprete Python.
 Uso: desde la raíz del workspace ejecutar:
     python .\Juego_Menu\main_menu.py
 
-- Pulsa el botón "Juego 1" o "Juego 2" para lanzar el juego correspondiente.
+- Usa ARRIBA/ABAJO para seleccionar; ENTER para lanzar el juego.
 - Cierra el juego para volver al menú.
-- Pulsa ESC o cierra la ventana para salir del menú.
+- Pulsa ESC para cerrar el menú y salir.
 """
 
 import os
@@ -68,11 +68,14 @@ def draw_button(rect, label, enabled=True, selected=False):
 
 
 def launch_game(path):
-    """Lanza el juego indicado y espera hasta que termine."""
+    """Lanza el juego indicado y espera hasta que termine.
+    Cierra la ventana del menú antes de lanzar y la reabre al terminar.
+    """
     if not os.path.exists(path):
         print(f"Archivo no encontrado: {path}")
         return
     print(f"Lanzando: {path}")
+
     # Usar el mismo intérprete
     global screen, font, small, clock
     try:
@@ -131,6 +134,7 @@ while running:
                     launch_game(JUEGO1_PATH)
                 elif selected == 1 and AVAILABLE['Juego 2']:
                     launch_game(JUEGO2_PATH)
+
     screen.fill((18, 24, 34))
 
     # Título

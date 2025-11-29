@@ -68,8 +68,7 @@ running = True
 # ============================================================
 while running:
     if game_over:
-        # Pantalla de inicio
-        show_start_screen(screen, clock, background)
+        # Iniciar inmediatamente sin pantalla de inicio
         
         # Reiniciar sprites
         all_sprites = pygame.sprite.Group()
