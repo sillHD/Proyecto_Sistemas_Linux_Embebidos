@@ -60,17 +60,65 @@ def draw_shield_bar_gl(x, y, pct):
 # CARGAR TEXTURAS
 # =======================
 # load_texture returns (tex_id, w, h)
-fondo_tex = load_texture(ruta("texturas", "background.png"))
-stayR_tex = load_texture(ruta("texturas", "stay_right.png"))
-stayL_tex = load_texture(ruta("texturas", "stay_left.png"))
+fondo_img = pygame.image.load(ruta("texturas", "background.png")).convert_alpha()
+fondo_tex = load_texture_from_surface(fondo_img)
+stayR_tex = load_texture_from_surface(
+    pygame.image.load(ruta("texturas", "stay_right.png")).convert_alpha()
+)
 
-walk_right_tex = [load_texture(ruta("texturas", "walk", "right", f"run_r{i}.png")) for i in range(1, 9)]
-walk_left_tex  = [load_texture(ruta("texturas", "walk", "left", f"run_l{i}.png")) for i in range(1, 9)]
-jump_right_tex = [load_texture(ruta("texturas", "jump", "jump_right", f"jump_r{i}.png")) for i in range(1, 9)]
-jump_left_tex  = [load_texture(ruta("texturas", "jump", "jump_left", f"jump_l{i}.png")) for i in range(1, 9)]
-clouds_tex     = [load_texture(ruta("texturas", "clouds", f"c{i}.png")) for i in range(1, 4)]
-enemy_left_tex = [load_texture(ruta("texturas", "enemy", "left", f"e_l{i}.png")) for i in range(1, 4)]
-enemy_right_tex= [load_texture(ruta("texturas", "enemy", "right", f"e_r{i}.png")) for i in range(1, 4)]
+stayL_tex = load_texture_from_surface(
+    pygame.image.load(ruta("texturas", "stay_left.png")).convert_alpha()
+)
+
+
+walk_right_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "walk", "right", f"run_r{i}.png")).convert_alpha()
+    )
+    for i in range(1, 9)
+]
+
+walk_left_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "walk", "left", f"run_l{i}.png")).convert_alpha()
+    )
+    for i in range(1, 9)
+]
+
+jump_right_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "jump", "jump_right", f"jump_r{i}.png")).convert_alpha()
+    )
+    for i in range(1, 9)
+]
+
+jump_left_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "jump", "jump_left", f"jump_l{i}.png")).convert_alpha()
+    )
+    for i in range(1, 9)
+]
+
+clouds_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "clouds", f"c{i}.png")).convert_alpha()
+    )
+    for i in range(1, 4)
+]
+enemy_left_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "enemy", "left", f"e_l{i}.png")).convert_alpha()
+    )
+    for i in range(1, 4)
+]
+
+enemy_right_tex = [
+    load_texture_from_surface(
+        pygame.image.load(ruta("texturas", "enemy", "right", f"e_r{i}.png")).convert_alpha()
+    )
+    for i in range(1, 4)
+]
+
 
 # =======================
 # FUNCIÓN DE COLISIÓN
