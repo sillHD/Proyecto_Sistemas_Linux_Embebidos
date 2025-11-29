@@ -25,13 +25,13 @@ meteor_list_files = ["Meteorito1.png", "Meteorito3.png", "Meteorito4.png",
 
 for img in meteor_list_files:
     try:
-        meteor_images.append(pygame.image.load(ruta(img)).convert())
+        meteor_images.append(pygame.image.load(ruta('Textturas', img)).convert())
     except pygame.error as e:
         print(f"Error cargando {img}: {e}")
 
 # Fondo
 try:
-    background = pygame.image.load(ruta('Fondo2.png')).convert()
+    background = pygame.image.load(ruta('Textturas', 'Fondo2.png')).convert()
 except pygame.error as e:
     print(f"Error cargando fondo: {e}")
 
@@ -39,8 +39,8 @@ except pygame.error as e:
 laser_sound = None
 explosion_sound = None
 try:
-    laser_sound = pygame.mixer.Sound(ruta('Lasersound.ogg'))
-    explosion_sound = pygame.mixer.Sound(ruta('Explosion.wav'))
+    laser_sound = pygame.mixer.Sound(ruta('Sounds', 'Lasersound.ogg'))
+    explosion_sound = pygame.mixer.Sound(ruta('Sounds', 'Explosion.wav'))
 except pygame.error as e:
     print(f"Error cargando sonidos: {e}")
 

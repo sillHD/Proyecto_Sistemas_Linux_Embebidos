@@ -11,7 +11,7 @@ class Player(pygame.sprite.Sprite):
     """Clase del jugador/cohete"""
     def __init__(self, laser_sound_obj=None):
         super().__init__()
-        self.image = pygame.image.load(ruta('Cohete.png')).convert()
+        self.image = pygame.image.load(ruta('Textturas', 'Cohete.png')).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH // 2
@@ -80,7 +80,7 @@ class Laser(pygame.sprite.Sprite):
     """Clase de láser disparado por el jugador"""
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load(ruta('Laser.png')).convert()
+        self.image = pygame.image.load(ruta('Textturas', 'Laser.png')).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.y = y
