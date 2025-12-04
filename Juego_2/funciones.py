@@ -159,8 +159,8 @@ def show_start_screen(screen, clock, background_img):
        Devuelve False si se cierra la ventana."""
     screen.blit(background_img, [0, 0])
     draw_text(screen, "SPACE WAR", 65, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 12)
-    draw_text(screen, "Diego Cortes Silva", 40, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2.3)
-    draw_text(screen, "Jhoan Sebastian Mosquera", 40, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.8)
+    draw_text(screen, "Ismael Cortes", 40, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2.3)
+    draw_text(screen, "Juan Esteban Agreda", 40, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.8)
     draw_text(screen, "Presione cualquier tecla", 25, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.2)
     pygame.display.flip()
 
