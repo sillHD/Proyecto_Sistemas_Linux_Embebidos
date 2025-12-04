@@ -77,12 +77,7 @@ Dentro de `Juego_2/`:
 
 ---
 
-## Controles
-- `A` — mover a la izquierda
-- `D` — mover a la derecha
-- `W` o `ESPACIO` — disparar
-- `ESC` — salir
-- Cerrar la ventana también termina la ejecución
+
 
 ---
 
