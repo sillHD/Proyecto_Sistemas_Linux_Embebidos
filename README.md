@@ -1,12 +1,4 @@
-Proyecto Sistemas Linux Embebidos – Videojuegos 2D
 
-Repositorio del proyecto de la asignatura Sistemas Embebidos en Linux, donde se desarrollan y optimizan dos videojuegos 2D usando Python + Pygame (y una versión opcional con OpenGL):
-
-Juego_1 → plataforma 2D con animaciones de personaje y enemigos.
-
-Juego_2 → shooter tipo Space War con meteoritos, barra de escudo y marcador.
-
-(Opcional) Juego_Menu → menú para lanzar los juegos desde una misma interfaz.
 # Proyecto Sistemas Linux Embebebidos — Videojuegos 2D
 
 Repositorio del proyecto de la asignatura *Sistemas Embebidos en Linux*. Contiene ejemplos y versiones optimizadas de dos juegos 2D desarrollados en Python + Pygame:
