@@ -65,13 +65,6 @@ Dentro de `Juego_2/`:
   - `Playersong.ogg` (música de fondo, si se usa).
 
 ---
-# Juego 2 — Space War
-
-Pequeño shooter 2D desarrollado en Python con Pygame como parte del proyecto de la asignatura **Sistemas Embebidos en Linux**.
-
-El jugador controla una nave situada en la parte inferior de la pantalla y debe destruir meteoritos que caen desde arriba. El juego incluye una barra de escudo, puntuación y efectos de sonido (cuando están disponibles).
-
-**Estado:** jugable · orientado a pruebas en entornos embebidos y WSL
 
 ---
 
