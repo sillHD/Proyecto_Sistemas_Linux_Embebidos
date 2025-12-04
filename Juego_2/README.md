@@ -152,12 +152,8 @@ En ese caso el juego funciona sin sonido; en Linux nativo los efectos se reprodu
 
 ## Cómo contribuir / pruebas
 - Ejecuta `python main.py` para jugar y probar mecánicas.
-- Para depurar o medir rendimiento, revisa `utils.py` y `settings.py`.
+- Para depurar o medir rendimiento, revisamos `utils.py` y `settings.py`.
 
-Si quieres, puedo:
-- añadir un `requirements.txt` o `pyproject.toml`,
-- traducir este README a inglés, o
-- crear instrucciones de empaquetado.
 
 ---
 
