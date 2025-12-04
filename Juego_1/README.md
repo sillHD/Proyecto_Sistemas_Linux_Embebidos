@@ -1,34 +1,3 @@
-# Juego_1 – Plataforma 2D (Proyecto Sistemas Linux Embebidos)
-
-Videojuego 2D tipo **plataforma/survival** desarrollado en Python como parte de la asignatura **Sistemas Embebidos en Linux**.  
-El jugador controla un personaje que puede **caminar** y **saltar** mientras evita enemigos que se mueven por la pantalla.  
-Incluye una versión clásica con Pygame y una versión optimizada que usa **OpenGL** para renderizar sprites en la GPU.
-
----
-
-## 1. Objetivo del juego
-
-- Controlar al personaje principal y **sobrevivir** el mayor tiempo posible.
-- Evitar que la hitbox del jugador colisione con la de los enemigos.
-- Si hay colisión con algún enemigo, la partida termina.
-
-No hay disparos ni ataque: la mecánica es de **evadir y moverse** aprovechando el salto y el desplazamiento lateral.
-
----
-
-## 2. Controles
-
-En la versión actual:
-
-- **`←`** → mover personaje a la **izquierda**
-- **`→`** → mover personaje a la **derecha**
-- **`↑`** → **saltar**
-- **`ENTER`** → salir de la pantalla de menú e iniciar partida (solo en la versión con menú)
-- **`ESC`** → salir del juego
-
-El juego se maneja únicamente con el teclado.
-
----
 
 # Juego 1 — Plataforma 2D
 
