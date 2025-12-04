@@ -137,24 +137,19 @@ except pygame.error:
 
 ---
 
-## Recomendaciones para la entrega
 
-- Mostrar este README y los `README.md` de cada juego.
-- Ejecutar el juego en Linux/WSL y mostrar controles + monitor CPU/GPU.
-- Explicar brevemente la portabilidad por rutas relativas y las decisiones de optimización.
 
 ---
 
 ## Contribuir / pruebas
 
 - Ejecuta `python main.py` en la carpeta del juego para probar.
-- Para medir rendimiento revisa `utils.py` y `settings.py`.
-- Si quieres, puedo añadir un `requirements.txt`, un script `run.sh` o traducir este README al inglés.
+- Para medir rendimiento revisamos `utils.py` y `settings.py`.
 
 ---
 
 ## Créditos
 
 Proyecto desarrollado en la asignatura *Sistemas Embebidos en Linux*.
-Autores: integrantes del grupo del curso.
+Autores: Ismael Cortes Ramirez, Juan Esteban Agreda Gutierrez.
 Tecnologías principales: Python, Pygame, psutil (opcionalmente PyOpenGL).
