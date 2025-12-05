@@ -29,8 +29,9 @@ El repositorio está preparado para ejecutarse en entornos Linux, WSL2 (con WSLg
 - **Explicación Técnica: Juego 1** — renderizado OpenGL y *batch processing*
 - **Explicación Técnica: Juego 2** — gestión de sprites, POO y robustez
 - **Explicación Técnica: Menú** — aislamiento de procesos y ciclo de vida
+- **Uso de la IA**
 - **Licencia**
-
+- 
 ---
 
 ## Estructura del repositorio
@@ -1180,6 +1181,17 @@ pygame.quit()
 print('Menu cerrado.')
 
 ````
+---
+
+## Uso de la IA
+
+A continuación se brindarán los chats utilizados a lo largo del proyecto, algunos son en base a la lichee RV Dock y otros en base a la beagleplay, en la  mayoria de
+Chats se empezaron con preguntas de contextualización para desarrollar un mejor prompting.
+
+ * https://gemini.google.com/share/6f02e30fb31b
+ * https://chatgpt.com/share/693308c6-d1c4-8013-a139-2ab94dcd36b4
+ * https://chatgpt.com/share/69331ad8-3668-8013-b65b-283768ba6127
+ * https://chatgpt.com/share/69331aee-5214-8013-b87a-3c9bbdcbce8e
 
 ---
 
