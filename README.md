@@ -321,6 +321,8 @@ Las animaciones utilizan el **contador de *frames*** (`frame_counter`) para sele
 
 Aquí tienes la explicación técnica detallada para el **Juego 2 (Space War)**. A diferencia del primero (que usaba OpenGL), este se enfoca en optimizaciones nativas de **Pygame** y **Programación Orientada a Objetos (POO)**.
 
+---
+
 ### 5\. Codigo
 
 ```python
@@ -735,6 +737,8 @@ Esto asegura que siempre haya una cantidad constante de enemigos en pantalla (9 
 
 Aquí tienes la explicación técnica del **Menú Principal**. Este script actúa como un "Hub" o lanzador centralizado. Su arquitectura es interesante porque no importa módulos, sino que gestiona **procesos del sistema operativo**, lo cual es ideal para aislar errores entre juegos.
 
+---
+
 ### 6\. Codigo
 
 ```python
@@ -939,6 +943,7 @@ while running:
 
 pygame.quit()
 ```
+---
 
 ## Explicación del Código: `main_menu.py` (Launcher)
 
@@ -1005,6 +1010,8 @@ Se implementa una **Máquina de Estados simple** para la navegación por teclado
   * **Comprobación de Archivos:** El diccionario `AVAILABLE` deshabilita visualmente los botones si los archivos de los juegos no se encuentran, previniendo errores de ejecución.
 
 <!-- end list -->
+
+---
 
 ### 5\. Codigo
 
