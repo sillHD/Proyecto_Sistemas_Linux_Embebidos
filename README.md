@@ -177,6 +177,174 @@ Controles y detalles de cada juego están en sus respectivos `README.md` dentro 
 
 ---
 
+##  **Subsistema Gráfico en Linux (fbcon, X11, Xinit, KMSDRM, Weston y otros)**
+
+En Linux existen múltiples métodos para dibujar gráficos en pantalla. Cada uno opera en un nivel distinto del stack gráfico y afecta directamente el rendimiento, la compatibilidad y el uso de recursos.
+Esta sección explica los principales sistemas evaluados en la **BeaglePlay** y por qué finalmente se eligió **xinit**.
+
+---
+
+### 1. **fbcon (Framebuffer Console)**
+
+`fbcon` es la consola que se dibuja directamente sobre el **framebuffer** del kernel, sin servidor gráfico.
+
+###  Ventajas
+
+* Mínima latencia
+* Bajo consumo de CPU
+* Funciona sin servidor gráfico
+* Ideal para sistemas muy limitados
+
+###  Desventajas
+
+* Sin soporte moderno para SDL2 / Pygame 2
+* Sin aceleración de hardware
+* Provoca FPS muy bajos en juegos 2D/3D modernos
+* No soporta OpenGL/EGL
+
+➡ **No fue viable para este proyecto.**
+
+---
+
+### 2. **X11 (Xorg)**
+
+El servidor gráfico tradicional de Linux.
+
+###  Ventajas
+
+* Soporte oficial de SDL2 / Pygame 2
+* Ventanas, teclado y ratón completamente integrados
+* Buena compatibilidad
+
+###  Desventajas
+
+* Overhead alto (usa memoria y CPU)
+* Latencia mayor
+* En BeaglePlay se observaron caídas de FPS
+* El compositor puede agregar retraso
+
+➡ Funciona, pero **no entrega el rendimiento deseado**.
+
+---
+
+### 3. **xinit (X11 minimalista)**
+
+`xinit` inicia un servidor X **solo con lo mínimo necesario** para ejecutar una aplicación.
+
+###  Ventajas
+
+* Arranca X sin escritorio (solo el juego)
+* Muchísimo más rápido que correr LXDE o GNOME
+* Menos procesos → más FPS
+* Totalmente compatible con SDL2
+* Baja latencia
+
+###  Desventajas
+
+* Solo ejecuta una ventana
+* No es un escritorio completo
+
+➡ **Es la opción más rápida y estable probada en el proyecto.**
+
+---
+
+### 4. **KMSDRM (Kernel Mode Setting + Direct Rendering Manager)**
+
+SDL2 tiene un backend llamado **KMSDRM**, que permite usar gráficos acelerados *sin X11*, directamente sobre DRM/KMS.
+
+Ejemplos de runtimes que usan KMSDRM:
+
+* SteamOS (Modo Big Picture)
+* RetroArch (cuando se ejecuta sin X11)
+* SDL2 puro en modo embebido
+
+### Ventajas
+
+* Aceleración directa (OpenGL ES)
+* Sin X11 → muy poco overhead
+* Excelente rendimiento en teoría
+* Perfecto para dispositivos embebidos
+
+###  Desventajas
+
+* **Pygame 2 NO soporta KMSDRM** (solo SDL2 en C lo hace)
+* La BeaglePlay requiere perfiles de EGL y drivers específicos
+* Requiere lanzar con `SDL_VIDEODRIVER=kmsdrm`
+* En pruebas, el juego no inició por fallas de EGL/DRM
+
+➡ **La opción más rápida en teoría, pero no compatible con Pygame 2 en esta placa.**
+
+---
+
+### 5. **Weston (Compositor Wayland)**
+
+Weston es el compositor de referencia de **Wayland**, más moderno que X11.
+
+### ✔ Ventajas
+
+* Muy eficiente
+* Excelente rendimiento con OpenGL ES
+* Menos latencia que X11
+* Perfecto para entornos embebidos modernos
+
+###  Problemas observados en BeaglePlay
+
+* El servicio fallaba: *“fbcon not available”*, *“compositor no iniciado”*
+* Weston no levantaba sesión gráfica
+* SDL2/Pygame no detectaba Wayland correctamente
+* No funcionaba el acelerador gráfico en nuestra configuración
+
+➡ **No fue posible hacerlo funcionar de forma estable.**
+
+---
+
+### 6. **kmscon**
+
+Reemplazo moderno de la consola de texto.
+
+###  Ventajas
+
+* Soporta UTF-8
+* Más rápido que fbcon
+* Mejor sistema de entrada (keyboard)
+
+###  Desventajas
+
+* Sin aceleración gráfica
+* No sirve para SDL2/Pygame
+* Es solo una terminal más bonita
+
+➡ **Incompatible con juegos 2D/3D modernos.**
+
+---
+
+###  **Comparación directa**
+
+| Sistema                | Aceleración | Compatible con Pygame | Estabilidad | FPS observados       | Resultado      |
+| ---------------------- | ----------- | --------------------- | ----------- | -------------------- | -------------- |
+| fbcon                  | ❌ No        | Parcial               | Alta        | Muy bajo             | ❌              |
+| kmscon                 | ❌ No        | No                    | Alta        | Muy bajo             | ❌              |
+| Weston (Wayland)       | ✔ Sí        | Parcial               | ❌ falló     | No iniciaba          | ❌              |
+| KMSDRM (SDL2 puro)     | ✔ Sí        | ❌ No en pygame        | Media       | No iniciaba          | ❌              |
+| X11 completo           | ✔ Parcial   | ✔ Sí                  | ✔ Sí        | Medio (24–27 FPS)    | Regular        |
+| **xinit + X11 mínimo** | ✔ Parcial   | ✔ Sí                  | ✔ Sí        | **Alto (36–41 FPS)** | **Optimo** |
+
+---
+
+### ✔ **Conclusión**
+
+Tras evaluar **fbcon, kmscon, X11, xinit, Weston y KMSDRM**, se determinó que:
+
+### **xinit es la opción con mayor rendimiento y estabilidad**
+
+* Compatible con SDL2 / Pygame
+* Aceleración gráfica funcional
+* Menor latencia
+* Cero sobrecarga de escritorio
+* Mejores FPS medidos en la BeaglePlay
+
+---
+
 ## Problemas conocidos
 
 - **Audio:** en algunos entornos  `pygame.mixer.init()` puede fallar. El código captura esta excepción y continúa sin sonido:
